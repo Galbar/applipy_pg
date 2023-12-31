@@ -1,14 +1,33 @@
 stages:
-- check
-- test-all
+- build-test-images
+- tests
 - publish
 
 variables:
-  REGISTRY_PROJECT_ID: "21689940"
+  PACKAGE_REGISTRY_PROJECT_ID: "21689940"
 
-check-3.12:
-  stage: check
-  image: python:3.12
+build-test-image-3.12:
+  stage: build-test-image
+  image: docker:20.10.16
+  variables:
+    PY_VERSION: 3.12
+    IMAGE: "registry.gitlab.com/applipy/applipy_pg"
+  services:
+  - docker:20.10.16-dind
+  script:
+  - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" "$CI_REGISTRY"
+  - docker build -f ./tests/Dockerfile --build-arg "PY_VERSION=${PY_VERSION}" --tag "${IMAGE}:test-${PY_VERSION}"
+  - docker push "${IMAGE}:${PY_VERSION}"
+  only:
+    refs:
+    - master
+    changes:
+    - tests/Dockerfile
+
+
+tests-3.12:
+  stage: tests
+  image: registry.gitlab.com/applipy/applipy_pg:test-3.12
   services:
   - docker:20.10.16-dind
   script:
@@ -18,12 +37,15 @@ check-3.12:
   - pytest --cov=applipy_pg --cov-report=term-missing
 
 # tests-X.Y:
-#   stage: test-all
+#   stage: tests
 #   image: python:X.Y
+#   services:
+#   - docker:20.10.16-dind
 #   script:
-#   - pip install pytest
-#   - pip install . --extra-index-url "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/api/v4/projects/${REGISTRY_PROJECT_ID}/packages/pypi/simple"
-#   - pytest
+#   - pip install '.[dev]'
+#   - flake8
+#   - mypy --strict --ignore-missing-imports applipy_pg tests
+#   - pytest --cov=applipy_pg --cov-report=term-missing
 
 publish-gitlab:
   stage: publish
@@ -31,7 +53,7 @@ publish-gitlab:
   variables:
     TWINE_USERNAME: gitlab-ci-token
     TWINE_PASSWORD: "${CI_JOB_TOKEN}"
-    TWINE_REPOSITORY_URL: "https://gitlab.com/api/v4/projects/${REGISTRY_PROJECT_ID}/packages/pypi"
+    TWINE_REPOSITORY_URL: "https://gitlab.com/api/v4/projects/${PACKAGE_REGISTRY_PROJECT_ID}/packages/pypi"
   script:
   - pip install twine
   - python setup.py sdist bdist_wheel

@@ -9,6 +9,8 @@ variables:
 check-3.12:
   stage: check
   image: python:3.12
+  services:
+  - docker:20.10.16-dind
   script:
   - pip install '.[dev]'
   - flake8

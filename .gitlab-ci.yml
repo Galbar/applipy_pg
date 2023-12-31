@@ -11,13 +11,13 @@ build-test-image-3.12:
   image: docker:20.10.16
   variables:
     PY_VERSION: "3.12"
-    IMAGE: "registry.gitlab.com/applipy/applipy_pg"
+    IMAGE: "registry.gitlab.com/applipy/applipy_pg/test"
   services:
   - docker:20.10.16-dind
   before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-  - docker build -f ./tests/Dockerfile --build-arg "PY_VERSION=${PY_VERSION}" --tag "${IMAGE}:test-${PY_VERSION}" .
+  - docker build -f ./tests/Dockerfile --build-arg "PY_VERSION=${PY_VERSION}" --tag "${IMAGE}:${PY_VERSION}" .
   - docker push "${IMAGE}:${PY_VERSION}"
   only:
     refs:
@@ -28,7 +28,7 @@ build-test-image-3.12:
 
 tests-3.12:
   stage: tests
-  image: registry.gitlab.com/applipy/applipy_pg:test-3.12
+  image: registry.gitlab.com/applipy/applipy_pg/test:3.12
   services:
   - docker:20.10.16-dind
   script:

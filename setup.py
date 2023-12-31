@@ -1,0 +1,44 @@
+from setuptools import setup, find_packages
+from distutils.util import convert_path
+from os import path
+
+ns: dict[str, str] = {}
+ver_path = convert_path("applipy_pg/version.py")
+with open(ver_path) as ver_file:
+    exec(ver_file.read(), ns)
+version = ns["__version__"]
+
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
+    long_description = f.read()
+
+setup(
+    name="applipy_pg",
+    url="https://gitlab.com/applipy/applipy_pg",
+    project_urls={
+        "Source": "https://gitlab.com/applipy/applipy_pg",
+    },
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python :: 3.12",
+        "Topic :: Software Development :: Libraries",
+    ],
+    description="Initialize PostgreSQL connection pools from config and make them available to the application components",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    license="Apache 2.0",
+    author="Alessio Linares",
+    author_email="mail@alessio.cc",
+    version=version,
+    packages=find_packages(exclude=["docs", "tests"]),
+    data_files=[],
+    python_requires=">=3.12",
+    install_requires=[
+        "applipy>=2.4.0,<3.0.0",
+        "aiopg>=1.4.0,<2.0.0",
+    ],
+    scripts=[],
+    package_data={"applipy_pg": ["py.typed"]},
+)

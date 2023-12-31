@@ -1,0 +1,11 @@
+.idea
+/.tox/
+/build/
+/dist/
+*.py[cod]
+.python-version
+.coverage
+/*.egg-info/
+/.ropeproject/
+/.mypy_cache/
+/.pytest_cache/

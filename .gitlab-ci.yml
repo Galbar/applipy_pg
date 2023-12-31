@@ -14,9 +14,10 @@ build-test-image-3.12:
     IMAGE: "registry.gitlab.com/applipy/applipy_pg"
   services:
   - docker:20.10.16-dind
+  before_script:
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-  - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" "$CI_REGISTRY"
-  - docker build -f ./tests/Dockerfile --build-arg "PY_VERSION=${PY_VERSION}" --tag "${IMAGE}:test-${PY_VERSION}"
+  - docker build -f ./tests/Dockerfile --build-arg "PY_VERSION=${PY_VERSION}" --tag "${IMAGE}:test-${PY_VERSION}" .
   - docker push "${IMAGE}:${PY_VERSION}"
   only:
     refs:

@@ -7,10 +7,10 @@ variables:
   PACKAGE_REGISTRY_PROJECT_ID: "21689940"
 
 build-test-image-3.12:
-  stage: build-test-image
+  stage: build-test-images
   image: docker:20.10.16
   variables:
-    PY_VERSION: 3.12
+    PY_VERSION: "3.12"
     IMAGE: "registry.gitlab.com/applipy/applipy_pg"
   services:
   - docker:20.10.16-dind

@@ -1,7 +1,9 @@
 import aiopg
 from applipy import (
+    BindFunction,
     Config,
     Module,
+    RegisterFunction,
 )
 
 from .handle import PgAppHandle
@@ -23,10 +25,10 @@ def _build_dsn(
 
 
 class PgModule(Module):
-    def __init__(self, config: Config):
+    def __init__(self, config: Config) -> None:
         self.config = config
 
-    def configure(self, bind, register):
+    def configure(self, bind: BindFunction, register: RegisterFunction) -> None:
         global_config = self.config.get("pg.global_config", {})
         for db in self.config.get("pg.databases", []):
             name = db.get("name")

@@ -48,6 +48,7 @@ setup(
             "docker==7.0.0",
             "pytest==7.4.3",
             "pytest-asyncio==0.23.2",
+            "pytest-cov==4.1.0",
             "mypy==1.8.0",
             "flake8==6.1.0",
         ],

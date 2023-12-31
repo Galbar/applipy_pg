@@ -1,5 +1,12 @@
 from contextlib import contextmanager
-from time import time, sleep
+from time import (
+    sleep,
+    time,
+)
+from typing import (
+    Any,
+    Iterator,
+)
 from unittest.mock import Mock
 from uuid import uuid4
 
@@ -29,7 +36,7 @@ def wait_pg_container_ready(container: _docker.models.containers.Container) -> N
 
 
 @contextmanager
-def create_db(client: _docker.APIClient):
+def create_db(client: _docker.APIClient) -> Iterator[dict[str, Any]]:
     user = str(uuid4())
     password = str(uuid4())
     dbname = str(uuid4())
@@ -48,7 +55,7 @@ def create_db(client: _docker.APIClient):
     )
     while not container.ports:
         container.reload()
-    port = int(container.ports["5432/tcp"][0]["HostPort"])
+    port = container.ports["5432/tcp"][0]["HostPort"]
     try:
         wait_pg_container_ready(container)
         yield {
@@ -63,20 +70,20 @@ def create_db(client: _docker.APIClient):
 
 
 @pytest.fixture
-def database_anon(docker):
+def database_anon(docker: _docker.APIClient) -> Iterator[dict[str, Any]]:
     with create_db(docker) as db:
         yield db
 
 
 @pytest.fixture
-def database_test1(docker):
+def database_test1(docker: _docker.APIClient) -> Iterator[dict[str, Any]]:
     with create_db(docker) as db:
         db["name"] = "test1"
         yield db
 
 
 @pytest.fixture
-def database_test2(docker):
+def database_test2(docker: _docker.APIClient) -> Iterator[dict[str, Any]]:
     with create_db(docker) as db:
         db["name"] = "test2"
         yield db
@@ -84,7 +91,9 @@ def database_test2(docker):
 
 @pytest.mark.asyncio
 class TestPgModule:
-    async def test_configure_and_connect_single_anonimous_db(self, database_anon):
+    async def test_configure_and_connect_single_anonimous_db(
+        self, database_anon: dict[str, Any]
+    ) -> None:
         config = Config(
             {
                 "pg.databases": [database_anon],
@@ -110,8 +119,11 @@ class TestPgModule:
         assert (await pool.pool()).closed
 
     async def test_configure_and_connect_multiple_dbs(
-        self, database_anon, database_test1, database_test2
-    ):
+        self,
+        database_anon: dict[str, Any],
+        database_test1: dict[str, Any],
+        database_test2: dict[str, Any],
+    ) -> None:
         config = Config(
             {
                 "pg.databases": [
@@ -147,11 +159,13 @@ class TestPgModule:
         for pool in actual_anon_pools + actual_test1_pools + actual_test2_pools:
             assert (await pool.pool()).closed
 
-    async def test_configure_pool_with_extra_config(self, database_anon):
-        database_anon['config'] = {
-            'minsize': 10,
-            'maxsize': 13,
-            'timeout': 43.,
+    async def test_configure_pool_with_extra_config(
+        self, database_anon: dict[str, Any]
+    ) -> None:
+        database_anon["config"] = {
+            "minsize": 10,
+            "maxsize": 13,
+            "timeout": 43.0,
         }
         config = Config(
             {
@@ -169,18 +183,20 @@ class TestPgModule:
         aiopg_pool = await pool.pool()
         assert aiopg_pool.minsize == 10
         aiopg_pool.maxsize == 13
-        aiopg_pool.timeout == 43.
+        aiopg_pool.timeout == 43.0
 
-    async def test_configure_pool_with_global_config(self, database_anon):
-        database_anon['config'] = {
-            'minsize': 1,
+    async def test_configure_pool_with_global_config(
+        self, database_anon: dict[str, Any]
+    ) -> None:
+        database_anon["config"] = {
+            "minsize": 1,
         }
         config = Config(
             {
-                'pg.global_config': {
-                    'minsize': 10,
-                    'maxsize': 13,
-                    'timeout': 43.,
+                "pg.global_config": {
+                    "minsize": 10,
+                    "maxsize": 13,
+                    "timeout": 43.0,
                 },
                 "pg.databases": [database_anon],
             }
@@ -196,4 +212,4 @@ class TestPgModule:
         aiopg_pool = await pool.pool()
         assert aiopg_pool.minsize == 1
         aiopg_pool.maxsize == 13
-        aiopg_pool.timeout == 43.
+        aiopg_pool.timeout == 43.0

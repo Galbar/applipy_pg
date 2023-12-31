@@ -30,7 +30,11 @@ tests-3.12:
   stage: tests
   image: registry.gitlab.com/applipy/applipy_pg/test:3.12
   services:
-  - docker:20.10.16-dind
+  - name: docker:20.10.16-dind
+    alias: docker_dind
+  variables:
+    DOCKER_HOST: tcp://docker_dind:2375
+    CONTAINERIZED_HOST: docker_dind
   script:
   - pip install '.[dev]'
   - flake8

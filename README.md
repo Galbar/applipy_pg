@@ -7,3 +7,92 @@
 [![PyPI Format](https://img.shields.io/pypi/format/applipy_pg.svg)](https://pypi.org/project/applipy_pg/)
 
 # Applipy PostgreSQL
+
+Library for working with PostgreSQL from an [applipy Application](https://gitlab.com/applipy/applipy).
+
+## Usage
+
+You can define connections to databases in you application config file:
+
+```yaml
+# dev.yaml
+app:
+  name: demo
+  modules:
+  - applipy_pg.PgModule
+
+pg:
+  databases:
+  # Defines an anonimous db connection pool
+  - user: username
+    host: mydb.local
+    port: 5432
+    dbname: demo
+    password: $3cr37
+  # Defines an db connection pool with name "db2"
+  - name: db2
+    user: username
+    host: mydb.local
+    port: 5432
+    dbname: demo
+    password: $3cr37
+```
+
+The configuration definition above defines two database connection pools. These
+can be accessed through applipy's dependency injection system:
+
+```python
+from applipy_pg import PgPool
+
+class DoSomethingOnDb:
+    def __init__(self, pool: PgPool) -> None:
+        self._pool = pool
+
+    async def do_something(self) -> None:
+        async with self.pool.cursor() as cur:
+            # cur is a aiopg.Cursor
+            await cur.execute('SELECT 1')
+            await cur.fetchone()
+
+from typing import Annotated
+from applipy_inject import name
+
+class DoSomethingOnDb2:
+    def __init__(self, pool: Annotated[PgPool, name('db2')]) -> None:
+        self._pool = pool
+
+    async def do_something(self) -> None:
+        async with self.pool.cursor() as cur:
+            # cur is a aiopg.Cursor
+            await cur.execute('SELECT 2')
+            await cur.fetchone()
+```
+
+The `aiopg.Pool` instance can be accessed using the `PgPool.pool()` method.
+
+Each connection pool can be further configured by setting a `config` attribute
+with a dict containing the extra paramenters to be passed to
+[`aiopg.create_pool()`](https://aiopg.readthedocs.io/en/stable/core.html#aiopg.create_pool):
+```yaml
+pg:
+  databases:
+  - user: username
+    host: mydb.local
+    port: 5432
+    dbname: demo
+    password: $3cr37
+    config:
+      minsize: 5
+      timeout: 100.0
+```
+
+You can also define a global configuration that will serve as a base to all
+database connections defined by setting `pg.global_config`.
+```yaml
+pg:
+  global_config:
+    minsize: 5
+    timeout: 100.0
+  databases:
+  # ...
+```

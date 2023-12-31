@@ -25,7 +25,9 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Topic :: Software Development :: Libraries",
     ],
-    description="Initialize PostgreSQL connection pools from config and make them available to the application components",
+    description=(
+        "Initialize PostgreSQL connection pools from config and make them available to the application components"
+    ),
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="Apache 2.0",
@@ -41,4 +43,13 @@ setup(
     ],
     scripts=[],
     package_data={"applipy_pg": ["py.typed"]},
+    extras_require={
+        "dev": [
+            "docker==7.0.0",
+            "pytest==7.4.3",
+            "pytest-asyncio==0.23.2",
+            "mypy==1.8.0",
+            "flake8==6.1.0",
+        ],
+    },
 )

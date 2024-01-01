@@ -1,3 +1,4 @@
+import os
 from contextlib import contextmanager
 from time import (
     sleep,
@@ -56,12 +57,13 @@ def create_db(client: _docker.APIClient) -> Iterator[dict[str, Any]]:
     while not container.ports:
         container.reload()
     port = container.ports["5432/tcp"][0]["HostPort"]
+    host = container.name if os.environ.get("CONTAINERIZED_HOST") else "localhost"
     try:
         wait_pg_container_ready(container)
         yield {
             "user": user,
             "password": password,
-            "host": "localhost",
+            "host": host,
             "port": port,
             "dbname": dbname,
         }

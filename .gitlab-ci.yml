@@ -35,6 +35,7 @@ tests-3.12:
   variables:
     DOCKER_HOST: tcp://docker_dind:2375
     CONTAINERIZED_HOST: docker_dind
+    FF_NETWORK_PER_BUILD: "true"  # https://docs.gitlab.com/ee/ci/services/#accessing-the-services
   script:
   - pip install '.[dev]'
   - flake8

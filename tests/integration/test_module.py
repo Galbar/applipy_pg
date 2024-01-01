@@ -59,7 +59,7 @@ class TestPgModule:
     ) -> None:
         config = Config(
             {
-                "pg.databases": [database_anon],
+                "pg.connections": [database_anon],
             }
         )
         sut = PgModule(config)
@@ -89,7 +89,7 @@ class TestPgModule:
     ) -> None:
         config = Config(
             {
-                "pg.databases": [
+                "pg.connections": [
                     database_anon,
                     database_test1,
                     database_test2,
@@ -132,7 +132,7 @@ class TestPgModule:
         }
         config = Config(
             {
-                "pg.databases": [database_anon],
+                "pg.connections": [database_anon],
             }
         )
         sut = PgModule(config)
@@ -161,7 +161,7 @@ class TestPgModule:
                     "maxsize": 13,
                     "timeout": 43.0,
                 },
-                "pg.databases": [database_anon],
+                "pg.connections": [database_anon],
             }
         )
         sut = PgModule(config)

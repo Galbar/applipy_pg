@@ -51,6 +51,7 @@ setup(
             "pytest-cov==4.1.0",
             "mypy==1.8.0",
             "flake8==6.1.0",
+            "testcontainers-postgres==0.0.1rc1",
         ],
     },
 )

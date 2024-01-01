@@ -1,9 +1,4 @@
-import os
 from contextlib import contextmanager
-from time import (
-    sleep,
-    time,
-)
 from typing import (
     Any,
     Iterator,
@@ -11,82 +6,48 @@ from typing import (
 from unittest.mock import Mock
 from uuid import uuid4
 
-import docker as _docker
 import pytest
 from applipy import Config
 from applipy_inject.inject import Injector
+from testcontainers.postgres import PostgresContainer
 
 from applipy_pg.handle import PgAppHandle
 from applipy_pg.module import PgModule
 from applipy_pg.pool_handle import PgPool
 
 
-@pytest.fixture
-def docker() -> _docker.APIClient:
-    return _docker.from_env()
-
-
-def wait_pg_container_ready(container: _docker.models.containers.Container) -> None:
-    status_code = -1
-    start = time()
-    while status_code != 0:
-        if time() - start >= 10:
-            raise TimeoutError("Database took too long to be ready")
-        status_code, _ = container.exec_run("pg_isready")
-    sleep(1)
-
-
 @contextmanager
-def create_db(client: _docker.APIClient) -> Iterator[dict[str, Any]]:
+def create_db() -> Iterator[dict[str, Any]]:
     user = str(uuid4())
     password = str(uuid4())
     dbname = str(uuid4())
-    container = client.containers.run(
-        "postgres:latest",
-        remove=True,
-        detach=True,
-        environment={
-            "POSTGRES_USER": user,
-            "POSTGRES_PASSWORD": password,
-            "POSTGRES_DB": dbname,
-        },
-        ports={
-            "5432/tcp": None,
-        },
-    )
-    while not container.ports:
-        container.reload()
-    port = container.ports["5432/tcp"][0]["HostPort"]
-    host = container.name if os.environ.get("CONTAINERIZED_HOST") else "localhost"
-    try:
-        wait_pg_container_ready(container)
+    port = 5432
+    with PostgresContainer(user=user, password=password, dbname=dbname, port=port) as container:
         yield {
             "user": user,
             "password": password,
-            "host": host,
-            "port": port,
+            "host": container.get_container_host_ip(),
+            "port": container.get_exposed_port(port),
             "dbname": dbname,
         }
-    finally:
-        container.stop()
 
 
 @pytest.fixture
-def database_anon(docker: _docker.APIClient) -> Iterator[dict[str, Any]]:
-    with create_db(docker) as db:
+def database_anon() -> Iterator[dict[str, Any]]:
+    with create_db() as db:
         yield db
 
 
 @pytest.fixture
-def database_test1(docker: _docker.APIClient) -> Iterator[dict[str, Any]]:
-    with create_db(docker) as db:
+def database_test1() -> Iterator[dict[str, Any]]:
+    with create_db() as db:
         db["name"] = "test1"
         yield db
 
 
 @pytest.fixture
-def database_test2(docker: _docker.APIClient) -> Iterator[dict[str, Any]]:
-    with create_db(docker) as db:
+def database_test2() -> Iterator[dict[str, Any]]:
+    with create_db() as db:
         db["name"] = "test2"
         yield db
 

@@ -61,8 +61,8 @@ publish-gitlab:
     TWINE_PASSWORD: "${CI_JOB_TOKEN}"
     TWINE_REPOSITORY_URL: "https://gitlab.com/api/v4/projects/${PACKAGE_REGISTRY_PROJECT_ID}/packages/pypi"
   script:
-  - pip install twine
-  - python setup.py sdist bdist_wheel
+  - pip install twine build
+  - python -m build
   - twine upload dist/*
   only:
     refs:
@@ -70,18 +70,18 @@ publish-gitlab:
     changes:
     - applipy_pg/version.py
 
-# publish-pypi:
-#   stage: publish
-#   image: python:latest
-#   variables:
-#     TWINE_USERNAME: __token__
-#     TWINE_PASSWORD: "${PYPI_TOKEN}"
-#   script:
-#   - pip install twine
-#   - python setup.py sdist bdist_wheel
-#   - twine upload dist/*
-#   only:
-#     refs:
-#     - master
-#     changes:
-#     - applipy_pg/version.py
+publish-pypi:
+  stage: publish
+  image: python:latest
+  variables:
+    TWINE_USERNAME: __token__
+    TWINE_PASSWORD: "${PYPI_TOKEN}"
+  script:
+  - pip install twine build
+  - python -m build
+  - twine upload dist/*
+  only:
+    refs:
+    - master
+    changes:
+    - applipy_pg/version.py

@@ -25,9 +25,7 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Topic :: Software Development :: Libraries",
     ],
-    description=(
-        "Initialize PostgreSQL connection pools from config and make them available to the application components"
-    ),
+    description="An applipy library for working with PostgreSQL.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="Apache 2.0",

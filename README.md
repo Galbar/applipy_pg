@@ -8,7 +8,14 @@
 
 # Applipy PostgreSQL
 
-Library for working with PostgreSQL from an [applipy Application](https://gitlab.com/applipy/applipy).
+An [applipy](https://gitlab.com/applipy/applipy) library for working with PostgreSQL.
+
+It lets you declare connections in the configuration of your application that
+get turned into postgres connection pools that can be accessed by declaring the
+dependency in your classes.
+
+The connection pools are created the first time they are used and closed on
+application shutdown.
 
 ## Usage
 
@@ -22,7 +29,7 @@ app:
   - applipy_pg.PgModule
 
 pg:
-  databases:
+  connections:
   # Defines an anonimous db connection pool
   - user: username
     host: mydb.local
@@ -73,9 +80,10 @@ The `aiopg.Pool` instance can be accessed using the `PgPool.pool()` method.
 Each connection pool can be further configured by setting a `config` attribute
 with a dict containing the extra paramenters to be passed to
 [`aiopg.create_pool()`](https://aiopg.readthedocs.io/en/stable/core.html#aiopg.create_pool):
+
 ```yaml
 pg:
-  databases:
+  connections:
   - user: username
     host: mydb.local
     port: 5432
@@ -88,11 +96,12 @@ pg:
 
 You can also define a global configuration that will serve as a base to all
 database connections defined by setting `pg.global_config`.
+
 ```yaml
 pg:
   global_config:
     minsize: 5
     timeout: 100.0
-  databases:
+  connections:
   # ...
 ```

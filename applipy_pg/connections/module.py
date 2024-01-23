@@ -8,8 +8,8 @@ from applipy import (
 from .connection import Connection
 from .handle import PgAppHandle
 from .pool_handle import (
-    PgPool,
     ApplipyPgPoolHandle,
+    PgPool,
 )
 
 
@@ -22,7 +22,7 @@ class PgModule(Module):
         for conn in self.config.get("pg.connections", []):
             db_config = {}
             db_config.update(global_config)
-            db_config.update(conn.get('config', {}))
+            db_config.update(conn.get("config", {}))
             connection = Connection(**conn, config=db_config)
             pool = PgPool(connection)
             bind(PgPool, pool, name=connection.name)

@@ -1,6 +1,8 @@
-from applipy import AppHandle
-from .pool_handle import ApplipyPgPoolHandle
 import asyncio
+
+from applipy import AppHandle
+
+from .pool_handle import ApplipyPgPoolHandle
 
 
 class PgAppHandle(AppHandle):

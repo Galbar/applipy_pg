@@ -21,7 +21,7 @@ class Connection:
         self.dbname = dbname
         self.password = password
         self.port = port
-        self.config = Config(kwargs).get('config') or {}
+        self.config = Config(kwargs).get("config") or {}
 
     def get_dsn(self) -> str:
         dsn = f"dbname={self.dbname} user={self.user} host={self.host}"

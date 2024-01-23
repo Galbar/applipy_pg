@@ -6,6 +6,7 @@ from typing import (
     Type,
 )
 
+import aiopg
 from aiopg import (
     Cursor,
     Pool,
@@ -13,7 +14,6 @@ from aiopg import (
 from aiopg.pool import _PoolCursorContextManager
 
 from .connection import Connection
-import aiopg
 
 
 class ApplipyPgPoolHandle(Protocol):

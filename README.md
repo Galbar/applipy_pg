@@ -105,3 +105,51 @@ pg:
   connections:
   # ...
 ```
+
+## Migrations
+
+This library also includes a migrations functionality. How to use it:
+
+First, define your migrations:
+
+```python
+class DemoMigrationSubject_20240101(ClassNameMigration):
+    def __init__(self, pool: PgPool) -> None:
+        self._pool = pool  # Import whatever resources you need
+
+    async def migrate(self) -> None:
+        # Do you migrations...
+        async with self._pool.cursor() as cur:
+            ...
+```
+
+If you want more control over how the version and subject of the migration is
+defined, you can extend `Migration` and implement your own logic.
+
+Then, create your migrations module:
+
+```python
+class MyMigrationsModule(Module):
+    def configure(self, bind: BindFunction, register: RegisterFunction) -> None:
+        bind(Migration, DemoMigrationSubject_20240101)
+
+    @classmethod
+    def depends_on(cls) -> tuple[type[Module], ...]:
+        return PgMigrationsModule,
+```
+
+Finally, you can optionally set the name of the connection to use for the
+migrations audit table. This table is used to know what migrations have been
+run and which migrations should be ran:
+
+```yaml
+pg:
+  connections:
+  # Defines an db connection pool with name "db2"
+  - name: db2
+    # ...
+  migrations:
+    # sets the connection named "db2" as the connection to use for the
+    # migrations audit table
+    connection: db2
+```

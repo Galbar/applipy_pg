@@ -3,7 +3,7 @@ from typing import Any, override
 
 
 @total_ordering
-class Migration:
+class PgMigration:
     async def migrate(self) -> None:
         raise NotImplementedError()
 
@@ -14,7 +14,7 @@ class Migration:
         raise NotImplementedError()
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, Migration):
+        if not isinstance(other, PgMigration):
             raise TypeError('Can only compare between Migrations')
         if other.subject() != self.subject():
             raise ValueError('Subject must be the same for both Migrations')
@@ -22,7 +22,7 @@ class Migration:
         return other.version() == self.version()
 
     def __lt__(self, other: Any) -> bool:
-        if not isinstance(other, Migration):
+        if not isinstance(other, PgMigration):
             raise TypeError('Can only compare between Migrations')
         if other.subject() != self.subject():
             raise ValueError('Subject must be the same for both Migrations')
@@ -30,7 +30,7 @@ class Migration:
         return self.version() < other.version()
 
 
-class ClassNameMigration(Migration):
+class PgClassNameMigration(PgMigration):
     """
     Utility class to create Migration classes that have their subject and
     version taken from the class name, using the format

@@ -1,12 +1,12 @@
 from .migration import (
-    ClassNameMigration,
-    Migration,
+    PgClassNameMigration,
+    PgMigration,
 )
 from .module import PgMigrationsModule
 
 
 __all__ = [
-    "ClassNameMigration",
-    "Migration",
+    "PgClassNameMigration",
+    "PgMigration",
     "PgMigrationsModule",
 ]

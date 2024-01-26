@@ -13,7 +13,7 @@ from aiopg import (
 )
 from aiopg.pool import _PoolCursorContextManager
 
-from .connection import Connection
+from .connection import PgConnection
 
 
 class ApplipyPgPoolHandle(Protocol):
@@ -78,7 +78,7 @@ class PgPool:
         aiopg_pool = await pool.pool()
     """
 
-    def __init__(self, connection: Connection) -> None:
+    def __init__(self, connection: PgConnection) -> None:
         self._connection = connection
         self._pool: Pool | None = None
 

@@ -1,17 +1,19 @@
 from .connections import (
+    PgConnection,
     PgModule,
     PgPool,
 )
 from .migrations import (
-    ClassNameMigration,
-    Migration,
+    PgClassNameMigration,
+    PgMigration,
     PgMigrationsModule,
 )
 
 
 __all__ = [
-    "ClassNameMigration",
-    "Migration",
+    "PgClassNameMigration",
+    "PgConnection",
+    "PgMigration",
     "PgMigrationsModule",
     "PgModule",
     "PgPool",

@@ -5,7 +5,7 @@ from applipy import (
     RegisterFunction,
 )
 
-from .connection import Connection
+from .connection import PgConnection
 from .handle import PgAppHandle
 from .pool_handle import (
     ApplipyPgPoolHandle,
@@ -21,9 +21,17 @@ class PgModule(Module):
         global_config = self.config.get("pg.global_config", {})
         for conn in self.config.get("pg.connections", []):
             db_config = {}
-            db_config.update(global_config)
-            db_config.update(conn.get("config", {}))
-            connection = Connection(**conn, config=db_config)
+            db_config.update(dict(global_config))
+            db_config.update(dict(conn.get("config", {})))
+            connection = PgConnection(
+                name=conn.get('name'),
+                user=conn['user'],
+                host=conn['host'],
+                dbname=conn['dbname'],
+                password=conn.get('password'),
+                port=conn.get('port'),
+                config=db_config,
+            )
             pool = PgPool(connection)
             bind(PgPool, pool, name=connection.name)
             bind(ApplipyPgPoolHandle, pool)

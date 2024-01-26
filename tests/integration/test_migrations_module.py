@@ -5,8 +5,13 @@ import pytest
 from applipy import Application, Config
 from applipy_inject.inject import with_names
 
-from applipy_pg import ClassNameMigration, Migration, PgPool, PgMigrationsModule
-from applipy_pg.connections.connection import Connection
+from applipy_pg import (
+    PgClassNameMigration,
+    PgConnection,
+    PgMigration,
+    PgMigrationsModule,
+    PgPool,
+)
 
 
 @pytest.fixture
@@ -16,7 +21,7 @@ def migrations_conn_name(database_test1: dict[str, str]) -> str:
 
 @pytest.fixture
 def migrations_conn(database_test1: dict[str, Any]) -> Iterator[PgPool]:
-    pool = PgPool(Connection(**database_test1))
+    pool = PgPool(PgConnection(**database_test1))
     yield pool
     pool.pool().close()
 
@@ -28,7 +33,7 @@ def output_conn_name(database_test2: dict[str, str]) -> str:
 
 @pytest.fixture
 def output_conn(database_test2: dict[str, Any]) -> Iterator[PgPool]:
-    pool = PgPool(Connection(**database_test2))
+    pool = PgPool(PgConnection(**database_test2))
     yield pool
     pool.pool().close()
 
@@ -53,7 +58,7 @@ def applipy_app_builder(config: Config) -> Callable[[], Application]:
     return lambda: Application(config).install(PgMigrationsModule)
 
 
-class _TestMigration1(Migration):
+class _TestMigration1(PgMigration):
     def __init__(self, pool: PgPool) -> None:
         self._pool = pool
 
@@ -74,7 +79,7 @@ class _TestMigration1(Migration):
         return "1"
 
 
-class _TestMigration2(Migration):
+class _TestMigration2(PgMigration):
     def __init__(self, pool: PgPool) -> None:
         self._pool = pool
 
@@ -92,7 +97,7 @@ class _TestMigration2(Migration):
         return "2"
 
 
-class SomeSubject_20240101(ClassNameMigration):
+class SomeSubject_20240101(PgClassNameMigration):
     def __init__(self, pool: PgPool) -> None:
         self._pool = pool
 
@@ -107,7 +112,7 @@ class SomeSubject_20240101(ClassNameMigration):
             )
 
 
-class SomeSubject_20240201(ClassNameMigration):
+class SomeSubject_20240201(PgClassNameMigration):
     def __init__(self, pool: PgPool) -> None:
         self._pool = pool
 
@@ -141,7 +146,7 @@ class TestPgMigrationsModule:
     ) -> None:
         applipy_app = applipy_app_builder()
         applipy_app.injector.bind(
-            Migration, with_names(_TestMigration1, {"pool": output_conn_name})
+            PgMigration, with_names(_TestMigration1, {"pool": output_conn_name})
         )
         await asyncio.to_thread(applipy_app.run)
 
@@ -172,10 +177,10 @@ class TestPgMigrationsModule:
     ) -> None:
         applipy_app = applipy_app_builder()
         applipy_app.injector.bind(
-            Migration, with_names(_TestMigration1, {"pool": output_conn_name})
+            PgMigration, with_names(_TestMigration1, {"pool": output_conn_name})
         )
         applipy_app.injector.bind(
-            Migration, with_names(_TestMigration2, {"pool": output_conn_name})
+            PgMigration, with_names(_TestMigration2, {"pool": output_conn_name})
         )
         await asyncio.to_thread(applipy_app.run)
 
@@ -207,12 +212,12 @@ class TestPgMigrationsModule:
     ) -> None:
         applipy_app_first = applipy_app_builder()
         applipy_app_first.injector.bind(
-            Migration, with_names(_TestMigration1, {"pool": output_conn_name})
+            PgMigration, with_names(_TestMigration1, {"pool": output_conn_name})
         )
         await asyncio.to_thread(applipy_app_first.run)
         applipy_app_second = applipy_app_builder()
         applipy_app_second.injector.bind(
-            Migration, with_names(_TestMigration2, {"pool": output_conn_name})
+            PgMigration, with_names(_TestMigration2, {"pool": output_conn_name})
         )
         await asyncio.to_thread(applipy_app_second.run)
 
@@ -245,16 +250,16 @@ class TestPgMigrationsModule:
     ) -> None:
         applipy_app = applipy_app_builder()
         applipy_app.injector.bind(
-            Migration, with_names(_TestMigration1, {"pool": output_conn_name})
+            PgMigration, with_names(_TestMigration1, {"pool": output_conn_name})
         )
         applipy_app.injector.bind(
-            Migration, with_names(_TestMigration2, {"pool": output_conn_name})
+            PgMigration, with_names(_TestMigration2, {"pool": output_conn_name})
         )
         applipy_app.injector.bind(
-            Migration, with_names(SomeSubject_20240101, {"pool": output_conn_name})
+            PgMigration, with_names(SomeSubject_20240101, {"pool": output_conn_name})
         )
         applipy_app.injector.bind(
-            Migration, with_names(SomeSubject_20240201, {"pool": output_conn_name})
+            PgMigration, with_names(SomeSubject_20240201, {"pool": output_conn_name})
         )
         await asyncio.to_thread(applipy_app.run)
 
@@ -297,18 +302,18 @@ class TestPgMigrationsModule:
     ) -> None:
         applipy_app_first = applipy_app_builder()
         applipy_app_first.injector.bind(
-            Migration, with_names(_TestMigration1, {"pool": output_conn_name})
+            PgMigration, with_names(_TestMigration1, {"pool": output_conn_name})
         )
         applipy_app_first.injector.bind(
-            Migration, with_names(SomeSubject_20240101, {"pool": output_conn_name})
+            PgMigration, with_names(SomeSubject_20240101, {"pool": output_conn_name})
         )
         await asyncio.to_thread(applipy_app_first.run)
         applipy_app_second = applipy_app_builder()
         applipy_app_second.injector.bind(
-            Migration, with_names(_TestMigration2, {"pool": output_conn_name})
+            PgMigration, with_names(_TestMigration2, {"pool": output_conn_name})
         )
         applipy_app_second.injector.bind(
-            Migration, with_names(SomeSubject_20240201, {"pool": output_conn_name})
+            PgMigration, with_names(SomeSubject_20240201, {"pool": output_conn_name})
         )
         await asyncio.to_thread(applipy_app_second.run)
 

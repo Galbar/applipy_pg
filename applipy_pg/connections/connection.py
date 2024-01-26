@@ -1,9 +1,7 @@
 from typing import Any
 
-from applipy import Config
 
-
-class Connection:
+class PgConnection:
     def __init__(
         self,
         *,
@@ -13,7 +11,7 @@ class Connection:
         dbname: str,
         password: str | None,
         port: str | int | None,
-        **kwargs: dict[str, Any],
+        config: dict[str, Any] | None = None,
     ) -> None:
         self.name = name
         self.user = user
@@ -21,7 +19,7 @@ class Connection:
         self.dbname = dbname
         self.password = password
         self.port = port
-        self.config = Config(kwargs).get("config") or {}
+        self.config = config or {}
 
     def get_dsn(self) -> str:
         dsn = f"dbname={self.dbname} user={self.user} host={self.host}"

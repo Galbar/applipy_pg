@@ -2,11 +2,11 @@ from logging import Logger
 
 from applipy import AppHandle
 
-from .migration import Migration
+from .migration import PgMigration
 from .repository import Repository
 
 
-class _DummyMigration(Migration):
+class _DummyMigration(PgMigration):
     def __init__(self, subject: str, version: str) -> None:
         self._subject = subject
         self._version = version
@@ -19,9 +19,9 @@ class _DummyMigration(Migration):
 
 
 def _get_migrations_by_subject(
-    migrations: list[Migration],
-) -> dict[str, list[Migration]]:
-    migrations_by_subject: dict[str, list[Migration]] = {}
+    migrations: list[PgMigration],
+) -> dict[str, list[PgMigration]]:
+    migrations_by_subject: dict[str, list[PgMigration]] = {}
     for migration in migrations:
         subject = migration.subject()
         if subject not in migrations_by_subject:
@@ -32,7 +32,7 @@ def _get_migrations_by_subject(
 
 class MigrationsHandle(AppHandle):
     def __init__(
-        self, migrations: list[Migration], repository: Repository, logger: Logger
+        self, migrations: list[PgMigration], repository: Repository, logger: Logger
     ) -> None:
         self._migrations_by_subject = _get_migrations_by_subject(migrations)
         self._repository = repository
@@ -47,7 +47,7 @@ class MigrationsHandle(AppHandle):
             else:
                 self._logger.debug("No migrations to execute for %s", subject)
 
-    async def _get_migrations_to_execute(self, subject: str) -> list[Migration]:
+    async def _get_migrations_to_execute(self, subject: str) -> list[PgMigration]:
         migrations = self._migrations_by_subject.get(subject, [])
         latest_version = await self._repository.get_latest_version(subject)
         self._logger.debug("Latest version for %s is %s", subject, latest_version)
@@ -61,7 +61,7 @@ class MigrationsHandle(AppHandle):
                 if dummy_latest_migration < migration
             ]
 
-    async def _execute_migrations(self, migrations: list[Migration]) -> None:
+    async def _execute_migrations(self, migrations: list[PgMigration]) -> None:
         if not migrations:
             return
 

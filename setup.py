@@ -43,7 +43,9 @@ setup(
     package_data={"applipy_pg": ["py.typed"]},
     extras_require={
         "dev": [
-            "docker==7.0.0",
+            "docker==7.1.0",
+            # This is the version required for docker to work: https://github.com/docker/docker-py/issues/3256
+            "requests==2.32.3",
             "pytest==7.4.3",
             "pytest-asyncio==0.23.2",
             "pytest-cov==4.1.0",

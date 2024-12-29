@@ -11,6 +11,7 @@ class PgConnection:
         dbname: str,
         password: str | None,
         port: str | int | None,
+        aliases: list[str] = [],
         config: dict[str, Any] | None = None,
     ) -> None:
         self.name = name
@@ -19,6 +20,7 @@ class PgConnection:
         self.dbname = dbname
         self.password = password
         self.port = port
+        self.aliases = aliases
         self.config = config or {}
 
     def get_dsn(self) -> str:

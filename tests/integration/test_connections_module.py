@@ -134,3 +134,24 @@ class TestPgModule:
         assert aiopg_pool.minsize == 1
         aiopg_pool.maxsize == 13
         aiopg_pool.timeout == 43.0
+
+    async def test_connection_alias(self) -> None:
+        config = Config(
+            {
+                "pg.connections": [{
+                    "user": "some_user",
+                    "password": "1234",
+                    "host": "192.168.5.1",
+                    "port": 1234,
+                    "dbname": "test1231241",
+                    "name": "db1",
+                    "aliases": ["db2", "db3"],
+                }],
+            }
+        )
+        sut = PgModule(config)
+        injector = Injector()
+        register = Mock()
+        sut.configure(injector.bind, register)
+        assert injector.get(PgPool, "db1") is injector.get(PgPool, "db2")
+        assert injector.get(PgPool, "db1") is injector.get(PgPool, "db3")

@@ -37,12 +37,14 @@ pg:
     dbname: demo
     password: $3cr37
   # Defines an db connection pool with name "db2"
+  # which is also aliased to names "db3" and "db4"
   - name: db2
     user: username
     host: mydb.local
     port: 5432
     dbname: demo
     password: $3cr37
+    aliases: [db3, db4]
 ```
 
 The configuration definition above defines two database connection pools. These
@@ -73,6 +75,21 @@ class DoSomethingOnDb2:
             # cur is a aiopg.Cursor
             await cur.execute('SELECT 2')
             await cur.fetchone()
+```
+
+Aliased pools can also be accessed using their aliases:
+
+```python
+from typing import Annotated
+from applipy_inject import name
+
+class DoSomethingOnDb2:
+    def __init__(
+        self,
+        pool2: Annotated[PgPool, name('db2')],
+        pool4: Annotated[PgPool, name('db4')],
+    ) -> None:
+        assert pool2 is pool4
 ```
 
 The `aiopg.Pool` instance can be accessed using the `PgPool.pool()` method.

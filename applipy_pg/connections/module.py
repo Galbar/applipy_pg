@@ -30,10 +30,13 @@ class PgModule(Module):
                 dbname=conn['dbname'],
                 password=conn.get('password'),
                 port=conn.get('port'),
+                aliases=conn.get('aliases', []),
                 config=db_config,
             )
             pool = PgPool(connection)
-            bind(PgPool, pool, name=connection.name)
             bind(ApplipyPgPoolHandle, pool)
+            bind(PgPool, pool, name=connection.name)
+            for alias in connection.aliases:
+                bind(PgPool, pool, name=alias)
 
         register(PgAppHandle)

@@ -1,3 +1,6 @@
+import importlib
+import inspect
+import pkgutil
 from functools import total_ordering
 from typing import Any, override
 
@@ -59,3 +62,21 @@ class PgClassNameMigration(PgMigration):
     @override
     def version(self) -> str:
         return self.__class__.__name__.split('_', 2)[1]
+
+
+def find_migrations(module_name: str) -> list[type[PgMigration]]:
+    module = importlib.import_module(module_name)
+    submodule_names = [f'{module.__name__}.{mi.name}' for mi in pkgutil.iter_modules(module.__path__)]
+    return [
+        class_obj
+        for submodule_name in submodule_names
+        for class_name, class_obj in
+        inspect.getmembers(
+            importlib.import_module(submodule_name),
+            lambda obj: (
+                inspect.isclass(obj)
+                and issubclass(obj, PgMigration)
+                and obj.__module__ == submodule_name
+            ),
+        )
+    ]

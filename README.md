@@ -130,7 +130,7 @@ This library also includes a migrations functionality. How to use it:
 First, define your migrations:
 
 ```python
-class DemoMigrationSubject_20240101(ClassNameMigration):
+class DemoMigrationSubject_20240101(PgClassNameMigration):
     def __init__(self, pool: PgPool) -> None:
         self._pool = pool  # Import whatever resources you need
 
@@ -141,14 +141,14 @@ class DemoMigrationSubject_20240101(ClassNameMigration):
 ```
 
 If you want more control over how the version and subject of the migration is
-defined, you can extend `Migration` and implement your own logic.
+defined, you can extend `PgMigration` and implement your own logic.
 
 Then, create your migrations module:
 
 ```python
 class MyMigrationsModule(Module):
     def configure(self, bind: BindFunction, register: RegisterFunction) -> None:
-        bind(Migration, DemoMigrationSubject_20240101)
+        bind(PgMigration, DemoMigrationSubject_20240101)
 
     @classmethod
     def depends_on(cls) -> tuple[type[Module], ...]:
@@ -170,3 +170,16 @@ pg:
     # migrations audit table
     connection: db2
 ```
+
+### Loading and Performing Migrations
+
+To load your migrations in the application you can:
+
+1. Bind them in an Applipy module to the type `PgMigration`, using the injector
+2. Have them all be part of a Python module and set the config
+   `pg.migrations.modules` to a list of strings containing the modules
+   containing migration classes.
+
+Then, just include the module `applipy_pg.PgMigrationsModule` somewhere in your
+app, i.e. in the config file and your migrations will be run during the
+`on_init` step of your application's lifecycle.

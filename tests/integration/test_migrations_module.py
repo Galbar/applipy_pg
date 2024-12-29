@@ -12,6 +12,7 @@ from applipy_pg import (
     PgMigrationsModule,
     PgPool,
 )
+from applipy_pg.migrations import find_migrations
 
 
 @pytest.fixture
@@ -348,3 +349,12 @@ class TestPgMigrationsModule:
         assert len(result) == 2
         assert result[0] == ("20240101", "SomeSubject")
         assert result[1] == ("20240201", "SomeSubject")
+
+    async def test_find_migrations(self) -> None:
+        migrations = find_migrations("tests.integration")
+        assert [m.__name__ for m in sorted(migrations, key=lambda c: c.__name__)] == [
+            "SomeSubject_20240101",
+            "SomeSubject_20240201",
+            "_TestMigration1",
+            "_TestMigration2",
+        ]
